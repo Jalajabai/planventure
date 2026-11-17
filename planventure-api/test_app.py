@@ -31,11 +31,45 @@ class AppTests(unittest.TestCase):
                              str(Path(module.app.instance_path) / 'planventure.db'))
         self.assertFalse(module.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'])
         self.assertFalse(module.app.debug)
-        response = module.app.test_client().get(
-            '/', headers={'Origin': 'http://example.com'}
-        )
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'],
-                         'http://example.com')
+        client = module.app.test_client()
+        for origin in ('http://localhost:3000', 'http://localhost:5173'):
+            response = client.get('/', headers={'Origin': origin})
+            self.assertEqual(response.headers['Access-Control-Allow-Origin'], origin)
+        response = client.get('/', headers={'Origin': 'http://example.com'})
+        self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    def test_cors_preflight_for_react_frontend(self):
+        module = self.load_app({'DATABASE_URL': 'sqlite:///:memory:'})
+        client = module.app.test_client()
+
+        response = client.options('/api/trips', headers={
+            'Origin': 'http://localhost:3000',
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'authorization,content-type',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], 'http://localhost:3000')
+        allowed_headers = response.headers['Access-Control-Allow-Headers'].lower()
+        self.assertIn('authorization', allowed_headers)
+        self.assertIn('content-type', allowed_headers)
+        allowed_methods = response.headers['Access-Control-Allow-Methods']
+        for method in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE'):
+            self.assertIn(method, allowed_methods)
+        self.assertEqual(response.headers['Access-Control-Max-Age'], '600')
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
+
+        blocked = client.options('/api/trips', headers={
+            'Origin': 'http://evil.example',
+            'Access-Control-Request-Method': 'POST',
+        })
+        self.assertNotIn('Access-Control-Allow-Origin', blocked.headers)
+
+    def test_cors_headers_on_authenticated_error_responses(self):
+        module = self.load_app({'DATABASE_URL': 'sqlite:///:memory:'})
+        response = module.app.test_client().get('/api/trips', headers={'Origin': 'http://localhost:5173'})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], 'http://localhost:5173')
 
     def test_environment_configuration_and_routes(self):
         module = self.load_app({

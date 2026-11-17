@@ -12,6 +12,9 @@ from routes.trips import trips_bp
 
 load_dotenv(Path(__file__).with_name('.env'))
 
+# Create React App and Vite dev servers
+DEFAULT_CORS_ORIGINS = 'http://localhost:3000,http://localhost:5173'
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -28,10 +31,17 @@ db.init_app(app)
 jwt.init_app(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(trips_bp)
-CORS(app, origins=[
-    origin.strip() for origin in os.getenv('CORS_ORIGINS', '*').split(',')
-    if origin.strip()
-])
+CORS(
+    app,
+    origins=[
+        origin.strip() for origin in os.getenv('CORS_ORIGINS', DEFAULT_CORS_ORIGINS).split(',')
+        if origin.strip()
+    ],
+    methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    # The JWT travels in the Authorization header, so cookies/credentials aren't needed
+    allow_headers=['Content-Type', 'Authorization'],
+    max_age=600,
+)
 
 
 @app.route('/')
