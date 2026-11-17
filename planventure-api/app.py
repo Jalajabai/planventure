@@ -8,6 +8,7 @@ from flask_cors import CORS
 from extensions import db, jwt
 import models  # noqa: F401  (registers models with SQLAlchemy)
 from routes.auth import auth_bp
+from routes.trips import trips_bp
 
 load_dotenv(Path(__file__).with_name('.env'))
 
@@ -26,6 +27,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(
 db.init_app(app)
 jwt.init_app(app)
 app.register_blueprint(auth_bp)
+app.register_blueprint(trips_bp)
 CORS(app, origins=[
     origin.strip() for origin in os.getenv('CORS_ORIGINS', '*').split(',')
     if origin.strip()

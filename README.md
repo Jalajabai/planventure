@@ -90,6 +90,16 @@ python -m unittest discover
 - POST /auth/login - Log in (`{"email", "password"}`); returns the user and an access token.
   Returns 400 for a missing field and 401 for an unknown email or wrong password (the same response for both).
 - GET /auth/me - Current user; requires an `Authorization: Bearer <access_token>` header (401 otherwise).
+- Trips (all require the `Authorization: Bearer <access_token>` header and only touch the logged-in user's trips;
+  trips owned by someone else return 404). A trailing slash is accepted on every route.
+  - POST /api/trips - Create a trip: `destination`, `start_date`, `end_date` (`YYYY-MM-DD`) are required;
+    `latitude`/`longitude` (provided together) and `itinerary` (JSON array or object) are optional. If `itinerary` is omitted,
+    a template with one empty entry per trip day is generated (`day`, `date`, `title`, `activities`, `notes`; none for trips longer than 365 days).
+    Send `"itinerary": []` to start with none. Returns 201.
+  - GET /api/trips - List your trips, ordered by start date.
+  - GET /api/trips/<id> - Get one trip.
+  - PUT or PATCH /api/trips/<id> - Update the supplied fields only (set `latitude` and `longitude` to `null` to clear them).
+  - DELETE /api/trips/<id> - Delete a trip (204).
 
 Protect your own routes with the `login_required` decorator from `utils/auth.py`
 (place it below `@route`); inside the view, `get_current_user()` returns the `User`.

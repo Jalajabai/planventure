@@ -8,14 +8,11 @@ from extensions import db
 from models import User
 from utils.auth import get_current_user, login_required
 from utils.jwt_utils import generate_access_token
+from utils.responses import error_response
 from utils.security import hash_password, verify_password
 from utils.validators import is_valid_email, validate_password
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-
-def error_response(message, status):
-    return jsonify({'error': message}), status
 
 
 @lru_cache(maxsize=1)
