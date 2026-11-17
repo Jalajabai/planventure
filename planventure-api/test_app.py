@@ -1,10 +1,14 @@
 import importlib.util
 import os
+from datetime import timedelta
 from pathlib import Path
 import unittest
 from unittest.mock import patch
 
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import text
+
+from utils.jwt_utils import generate_access_token
 
 
 class AppTests(unittest.TestCase):
@@ -55,6 +59,8 @@ class AppTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.get_json(), payload)
 
+        self.assertEqual(client.post('/auth/register', json={}).status_code, 400)
+
         for origin in ('http://localhost:3000', 'http://localhost:5173'):
             response = client.get('/health', headers={'Origin': origin})
             self.assertEqual(response.headers['Access-Control-Allow-Origin'], origin)
@@ -62,3 +68,39 @@ class AppTests(unittest.TestCase):
             '/health', headers={'Origin': 'http://untrusted.example'}
         )
         self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    def test_jwt_configuration_and_error_responses(self):
+        module = self.load_app({
+            'DATABASE_URL': 'sqlite:///:memory:',
+            'JWT_SECRET_KEY': 'jwt-test-key-0123456789-abcdefghijklmnop',
+            'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': '5',
+        })
+        self.assertEqual(module.app.config['JWT_ACCESS_TOKEN_EXPIRES'], timedelta(minutes=5))
+
+        @module.app.route('/protected')
+        @jwt_required()
+        def protected():
+            return module.jsonify({"user": get_jwt_identity()})
+
+        client = module.app.test_client()
+        with module.app.app_context():
+            self.addCleanup(module.db.engine.dispose)
+            token = generate_access_token(7)
+
+        response = client.get('/protected', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.get_json(), {"user": "7"})
+
+        response = client.get('/protected')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('error', response.get_json())
+
+        response = client.get('/protected', headers={'Authorization': 'Bearer garbage'})
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('error', response.get_json())
+
+        module.app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=-1)
+        with module.app.app_context():
+            expired = generate_access_token(7)
+        response = client.get('/protected', headers={'Authorization': f'Bearer {expired}'})
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Token has expired"})

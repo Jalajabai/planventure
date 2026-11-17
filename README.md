@@ -56,7 +56,13 @@ Configuration:
   `instance` directory. Run `python init_db.py` to create the tables.
 - `SECRET_KEY`: Flask signing key; required before using sessions.
 - `CORS_ORIGINS`: comma-separated allowed origins, or `*` (the default).
-- `JWT_SECRET_KEY`: reserved for future authentication; not currently used.
+- `JWT_SECRET_KEY`: signing key for JWTs (falls back to `SECRET_KEY` if unset);
+  use a random value of at least 32 characters.
+- `JWT_ACCESS_TOKEN_EXPIRES_MINUTES`: access token lifetime, default `60`.
+
+JWT helpers live in `utils/jwt_utils.py`: `generate_access_token(user_id)`,
+`verify_access_token(token)` (returns the user id or `None`) and
+`get_user_from_token(token)`.
 
 5. Create the database tables:
 ```sh
@@ -79,6 +85,14 @@ python -m unittest discover
 ## 📚 API Endpoints
 - GET / - Welcome message
 - GET /health - Health check endpoint
+- POST /auth/register - Register a user (`{"email", "password"}`); returns the user and an access token.
+  Returns 400 for an invalid email or password (minimum 8 characters, at most 72 bytes) and 409 if the email is already registered.
+- POST /auth/login - Log in (`{"email", "password"}`); returns the user and an access token.
+  Returns 400 for a missing field and 401 for an unknown email or wrong password (the same response for both).
+- GET /auth/me - Current user; requires an `Authorization: Bearer <access_token>` header (401 otherwise).
+
+Protect your own routes with the `login_required` decorator from `utils/auth.py`
+(place it below `@route`); inside the view, `get_current_user()` returns the `User`.
 
 ## 📝 License
 

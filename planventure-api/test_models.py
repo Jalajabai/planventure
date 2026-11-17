@@ -55,6 +55,16 @@ class UserModelTests(DbTestCase):
         with self.assertRaises(IntegrityError):
             db.session.commit()
 
+    def test_set_and_check_password(self):
+        user = User(email='a@example.com')
+        user.set_password('s3cret-pass')
+        db.session.add(user)
+        db.session.commit()
+
+        self.assertNotIn('s3cret-pass', user.password_hash)
+        self.assertTrue(user.check_password('s3cret-pass'))
+        self.assertFalse(user.check_password('wrong'))
+
     def test_to_dict_excludes_password_hash(self):
         user = User(email='a@example.com', password_hash='secret-hash')
         db.session.add(user)

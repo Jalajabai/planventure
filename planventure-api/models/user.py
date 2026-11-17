@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import validates
 
 from extensions import db
+from utils.security import hash_password, verify_password
 
 
 def utcnow():
@@ -29,6 +30,12 @@ class User(db.Model):
     @validates('email')
     def normalize_email(self, key, value):
         return value.strip().lower()
+
+    def set_password(self, password):
+        self.password_hash = hash_password(password)
+
+    def check_password(self, password):
+        return verify_password(password, self.password_hash)
 
     def to_dict(self):
         # password_hash is intentionally never serialized
