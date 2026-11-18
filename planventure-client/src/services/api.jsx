@@ -10,8 +10,9 @@ const getAuthHeaders = () => {
   };
 };
 
-const handleResponse = async (response) => {
-  if (response.status === 401) {
+const handleResponse = async (response, { redirectOnUnauthorized = true } = {}) => {
+  // Login/register return 401 for bad credentials, which is not an expired session
+  if (response.status === 401 && redirectOnUnauthorized) {
     removeToken();
     window.location.href = '/login';
     throw new Error('Session expired. Please login again.');
@@ -26,7 +27,6 @@ const handleResponse = async (response) => {
     throw new Error(data.error || data.message || 'Request failed');
   }
 
-  console.log('API Response:', data); // Debug log
   return data;
 };
 
@@ -38,13 +38,13 @@ export const api = {
     return handleResponse(response);
   },
   
-  post: async (endpoint, data) => {
+  post: async (endpoint, data, options) => {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
+    return handleResponse(response, options);
   },
 
   put: async (endpoint, data) => {
@@ -57,12 +57,12 @@ export const api = {
   },
 
   auth: {
-    login: async (credentials) => {
-      return api.post('/auth/login', credentials);
+    login: async ({ email, password }) => {
+      return api.post('/auth/login', { email, password }, { redirectOnUnauthorized: false });
     },
 
-    register: async (userData) => {
-      return api.post('/auth/register', userData);
+    register: async ({ email, password }) => {
+      return api.post('/auth/register', { email, password }, { redirectOnUnauthorized: false });
     }
   }
 };

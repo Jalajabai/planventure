@@ -97,12 +97,7 @@ const SignupForm = () => {
     setError('');
 
     try {
-      const userData = {
-        email: formData.email,
-        password: formData.password
-      };
-
-      await api.auth.register(userData);
+      await api.auth.register(formData);
       
       // Don't check for accessToken, just redirect after successful registration
       navigate('/login', { 

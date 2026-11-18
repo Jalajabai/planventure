@@ -17,15 +17,15 @@ def register():
     
     # Validate required fields
     if not all(k in data for k in ['email', 'password']):
-        return jsonify(MISSING_FIELDS)
+        return MISSING_FIELDS
     
     # Validate email format
     if not validate_email(data['email']):
-        return jsonify(INVALID_EMAIL)
+        return INVALID_EMAIL
     
     # Check if user already exists
     if User.query.filter_by(email=data['email']).first():
-        return jsonify(EMAIL_EXISTS)
+        return EMAIL_EXISTS
     
     # Create new user
     try:
@@ -50,7 +50,7 @@ def login():
     
     # Validate required fields
     if not all(k in data for k in ['email', 'password']):
-        return jsonify(MISSING_FIELDS)
+        return MISSING_FIELDS
     
     # Find user by email
     user = User.query.filter_by(email=data['email']).first()
@@ -67,4 +67,4 @@ def login():
             }
         }), 200
     
-    return jsonify(INVALID_CREDENTIALS)
+    return INVALID_CREDENTIALS

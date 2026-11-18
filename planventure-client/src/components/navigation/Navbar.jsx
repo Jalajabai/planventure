@@ -1,19 +1,21 @@
-import { AppBar, Box, Toolbar, Typography, Button, Stack } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const Navbar = () => {
+const Navbar = ({ children }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
+    // Navigate first so ProtectedRoute doesn't redirect to /login once auth clears
+    navigate('/', { replace: true });
     logout();
-    navigate('/');
   };
 
   return (
     <AppBar position="fixed">
       <Toolbar>
+        {children}
         <Typography 
           variant="h6" 
           component="div" 

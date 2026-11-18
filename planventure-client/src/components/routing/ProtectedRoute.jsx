@@ -6,6 +6,10 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
+    // A navigation is already in flight (e.g. logout navigating home), so don't override it
+    if (window.location.pathname !== location.pathname) {
+      return null;
+    }
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
