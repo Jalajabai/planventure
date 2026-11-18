@@ -10,13 +10,10 @@ import {
   IconButton
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
-import { Link as RouterLink } from 'react-router-dom';
 import { api } from '../../services/api';
 
 const SignupForm = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +60,19 @@ const SignupForm = () => {
     }));
   };
 
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = {
+      email: () => validateEmail(value),
+      password: () => validatePassword(value),
+      confirmPassword: () => validateConfirmPassword(value, formData.password)
+    }[name]();
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -92,8 +102,7 @@ const SignupForm = () => {
         password: formData.password
       };
 
-      const response = await api.auth.register(userData);
-      console.log('Signup response:', response); // Debug log
+      await api.auth.register(userData);
       
       // Don't check for accessToken, just redirect after successful registration
       navigate('/login', { 
@@ -105,7 +114,7 @@ const SignupForm = () => {
       });
       
     } catch (err) {
-      console.error('Signup error:', err); // Debug log
+      console.error('Signup error:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -144,6 +153,7 @@ const SignupForm = () => {
         type="email"
         value={formData.email}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={!!formErrors.email}
         helperText={formErrors.email}
         disabled={isLoading}
@@ -157,6 +167,7 @@ const SignupForm = () => {
         type={showPassword ? 'text' : 'password'}
         value={formData.password}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={!!formErrors.password}
         helperText={formErrors.password}
         disabled={isLoading}
@@ -183,6 +194,7 @@ const SignupForm = () => {
         type={showPassword ? 'text' : 'password'}
         value={formData.confirmPassword}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={!!formErrors.confirmPassword}
         helperText={formErrors.confirmPassword}
         disabled={isLoading}
@@ -202,9 +214,9 @@ const SignupForm = () => {
 
       <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
         Already have an account?{' '}
-        <RouterLink to="/login" style={{ textDecoration: 'none' }}>
+        <Button onClick={() => navigate('/login')} sx={{ textTransform: 'none' }}>
           Login
-        </RouterLink>
+        </Button>
       </Typography>
     </Box>
   );
