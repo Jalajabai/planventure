@@ -150,8 +150,13 @@ def get_trip(trip_id):
         'end_date': trip.end_date.isoformat(),
         'latitude': trip.latitude,
         'longitude': trip.longitude,
-        'itinerary': trip.itinerary
+        'itinerary': trip.itinerary,
+        'accommodations': trip.accommodations or [],
+        'transportation': trip.transportation or []
     }), 200
+
+def is_list_of_dicts(value):
+    return isinstance(value, list) and all(isinstance(item, dict) for item in value)
 
 def update_trip(trip_id):
     user_id = get_jwt_identity()
@@ -161,8 +166,16 @@ def update_trip(trip_id):
         return jsonify({'error': 'Trip not found'}), 404
         
     data = request.get_json()
+
+    for field in ('accommodations', 'transportation'):
+        if field in data and not is_list_of_dicts(data[field]):
+            return jsonify({'error': f'{field} must be a list of objects'}), 400
     
     try:
+        if 'accommodations' in data:
+            trip.accommodations = data['accommodations']
+        if 'transportation' in data:
+            trip.transportation = data['transportation']
         if 'title' in data:
             trip.title = (data['title'] or '').strip() or None
         if 'destination' in data:
@@ -170,9 +183,16 @@ def update_trip(trip_id):
         if 'start_date' in data or 'end_date' in data:
             start_date = datetime.fromisoformat(data.get('start_date', trip.start_date.isoformat()).replace('Z', '+00:00'))
             end_date = datetime.fromisoformat(data.get('end_date', trip.end_date.isoformat()).replace('Z', '+00:00'))
-            # Generate new itinerary template for new dates if itinerary is not provided
             if 'itinerary' not in data:
-                data['itinerary'] = generate_default_itinerary(start_date, end_date)
+                # Rebuild the day list for the new range but keep days that still fall inside it
+                new_itinerary = generate_default_itinerary(start_date, end_date)
+                existing_itinerary = trip.itinerary or {}
+                for day in new_itinerary:
+                    if day in existing_itinerary:
+                        new_itinerary[day] = existing_itinerary[day]
+                data['itinerary'] = new_itinerary
+            trip.start_date = start_date
+            trip.end_date = end_date
         if 'latitude' in data:
             trip.latitude = data['latitude']
         if 'longitude' in data:

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,15 +16,27 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon
 } from '@mui/icons-material';
-import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { formatDateTime, isEndBeforeStart } from '../../utils/dateTime';
 
-const TransportationCard = ({ transport, onUpdate, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const TransportationCard = ({ transport, onUpdate, onDelete, isNew = false, onCancel }) => {
+  const [isEditing, setIsEditing] = useState(isNew);
   const [editedData, setEditedData] = useState(transport);
 
+  const arrivalError = isEndBeforeStart(editedData.departure, editedData.arrival);
+  const isValid = Boolean(editedData.from?.trim() && editedData.to?.trim()) && !arrivalError;
+
   const handleSave = () => {
-    onUpdate(editedData);
+    onUpdate({ ...editedData, from: editedData.from.trim(), to: editedData.to.trim() });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    if (isNew) {
+      onCancel();
+      return;
+    }
+    setEditedData(transport);
     setIsEditing(false);
   };
 
@@ -46,12 +59,15 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
             </TextField>
             <TextField
               fullWidth
+              required
               label="From"
               value={editedData.from}
               onChange={(e) => setEditedData({ ...editedData, from: e.target.value })}
+              autoFocus={isNew}
             />
             <TextField
               fullWidth
+              required
               label="To"
               value={editedData.to}
               onChange={(e) => setEditedData({ ...editedData, to: e.target.value })}
@@ -71,6 +87,8 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
               value={editedData.arrival}
               onChange={(e) => setEditedData({ ...editedData, arrival: e.target.value })}
               InputLabelProps={{ shrink: true }}
+              error={arrivalError}
+              helperText={arrivalError ? 'Arrival must be after departure' : ''}
             />
             <TextField
               fullWidth
@@ -79,10 +97,15 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
               onChange={(e) => setEditedData({ ...editedData, bookingRef: e.target.value })}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button startIcon={<CancelIcon />} onClick={() => setIsEditing(false)}>
+              <Button startIcon={<CancelIcon />} onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSave}>
+              <Button
+                startIcon={<SaveIcon />}
+                variant="contained"
+                onClick={handleSave}
+                disabled={!isValid}
+              >
                 Save
               </Button>
             </Box>
@@ -104,10 +127,10 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
               {transport.from} → {transport.to}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Departure: {new Date(transport.departure).toLocaleString()}
+              Departure: {formatDateTime(transport.departure)}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Arrival: {new Date(transport.arrival).toLocaleString()}
+              Arrival: {formatDateTime(transport.arrival)}
             </Typography>
             {transport.bookingRef && (
               <Typography variant="body2">
@@ -116,10 +139,14 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
             )}
           </Box>
           <Box>
-            <IconButton onClick={() => setIsEditing(true)}>
+            <IconButton onClick={() => setIsEditing(true)} aria-label="Edit transportation">
               <EditIcon />
             </IconButton>
-            <IconButton onClick={() => onDelete(transport.id)} color="error">
+            <IconButton
+              onClick={() => onDelete(transport.id)}
+              color="error"
+              aria-label="Delete transportation"
+            >
               <DeleteIcon />
             </IconButton>
           </Box>
@@ -140,7 +167,9 @@ TransportationCard.propTypes = {
     bookingRef: PropTypes.string,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
+  isNew: PropTypes.bool,
+  onCancel: PropTypes.func,
 };
 
 export default TransportationCard;

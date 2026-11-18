@@ -13,6 +13,8 @@ class Trip(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     itinerary = db.Column(db.JSON)
+    accommodations = db.Column(db.JSON)
+    transportation = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

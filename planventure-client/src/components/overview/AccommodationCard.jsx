@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -6,25 +7,35 @@ import {
   IconButton,
   Button,
   TextField,
-  Stack,
-  Collapse
+  Stack
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
-  Hotel as HotelIcon
+  Cancel as CancelIcon
 } from '@mui/icons-material';
-import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { formatDateTime, isEndBeforeStart } from '../../utils/dateTime';
 
-const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const AccommodationCard = ({ accommodation, onUpdate, onDelete, isNew = false, onCancel }) => {
+  const [isEditing, setIsEditing] = useState(isNew);
   const [editedData, setEditedData] = useState(accommodation);
 
+  const checkOutError = isEndBeforeStart(editedData.checkIn, editedData.checkOut);
+  const isValid = Boolean(editedData.name?.trim()) && !checkOutError;
+
   const handleSave = () => {
-    onUpdate(editedData);
+    onUpdate({ ...editedData, name: editedData.name.trim() });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    if (isNew) {
+      onCancel();
+      return;
+    }
+    setEditedData(accommodation);
     setIsEditing(false);
   };
 
@@ -35,9 +46,11 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
           <Stack spacing={2}>
             <TextField
               fullWidth
+              required
               label="Name"
               value={editedData.name}
               onChange={(e) => setEditedData({ ...editedData, name: e.target.value })}
+              autoFocus={isNew}
             />
             <TextField
               fullWidth
@@ -60,6 +73,8 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
               value={editedData.checkOut}
               onChange={(e) => setEditedData({ ...editedData, checkOut: e.target.value })}
               InputLabelProps={{ shrink: true }}
+              error={checkOutError}
+              helperText={checkOutError ? 'Check-out must be after check-in' : ''}
             />
             <TextField
               fullWidth
@@ -68,10 +83,15 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
               onChange={(e) => setEditedData({ ...editedData, bookingRef: e.target.value })}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button startIcon={<CancelIcon />} onClick={() => setIsEditing(false)}>
+              <Button startIcon={<CancelIcon />} onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSave}>
+              <Button
+                startIcon={<SaveIcon />}
+                variant="contained"
+                onClick={handleSave}
+                disabled={!isValid}
+              >
                 Save
               </Button>
             </Box>
@@ -89,14 +109,16 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
             <Typography variant="h6" gutterBottom>
               {accommodation.name}
             </Typography>
-            <Typography color="text.secondary" gutterBottom>
-              {accommodation.address}
+            {accommodation.address && (
+              <Typography color="text.secondary" gutterBottom>
+                {accommodation.address}
+              </Typography>
+            )}
+            <Typography variant="body2" gutterBottom>
+              Check-in: {formatDateTime(accommodation.checkIn)}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Check-in: {new Date(accommodation.checkIn).toLocaleString()}
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Check-out: {new Date(accommodation.checkOut).toLocaleString()}
+              Check-out: {formatDateTime(accommodation.checkOut)}
             </Typography>
             {accommodation.bookingRef && (
               <Typography variant="body2">
@@ -105,10 +127,14 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
             )}
           </Box>
           <Box>
-            <IconButton onClick={() => setIsEditing(true)}>
+            <IconButton onClick={() => setIsEditing(true)} aria-label="Edit accommodation">
               <EditIcon />
             </IconButton>
-            <IconButton onClick={() => onDelete(accommodation.id)} color="error">
+            <IconButton
+              onClick={() => onDelete(accommodation.id)}
+              color="error"
+              aria-label="Delete accommodation"
+            >
               <DeleteIcon />
             </IconButton>
           </Box>
@@ -128,7 +154,9 @@ AccommodationCard.propTypes = {
     bookingRef: PropTypes.string,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
+  isNew: PropTypes.bool,
+  onCancel: PropTypes.func,
 };
 
 export default AccommodationCard;

@@ -2,13 +2,21 @@ from sqlalchemy import inspect, text
 from app import create_app, db
 from models import User
 
+# Columns added after the first release; create_all() never alters existing tables
+NEW_TRIP_COLUMNS = {
+    'title': 'VARCHAR(200)',
+    'accommodations': 'JSON',
+    'transportation': 'JSON',
+}
+
 def add_missing_columns():
-    """Add columns introduced after a database was first created (create_all skips existing tables)."""
-    columns = {column['name'] for column in inspect(db.engine).get_columns('trips')}
-    if 'title' not in columns:
-        with db.engine.begin() as connection:
-            connection.execute(text('ALTER TABLE trips ADD COLUMN title VARCHAR(200)'))
-        print("Added trips.title column")
+    """Add any columns from NEW_TRIP_COLUMNS that an existing database doesn't have yet."""
+    existing = {column['name'] for column in inspect(db.engine).get_columns('trips')}
+    for name, column_type in NEW_TRIP_COLUMNS.items():
+        if name not in existing:
+            with db.engine.begin() as connection:
+                connection.execute(text(f'ALTER TABLE trips ADD COLUMN {name} {column_type}'))
+            print(f"Added trips.{name} column")
 
 def init_db():
     app = create_app()

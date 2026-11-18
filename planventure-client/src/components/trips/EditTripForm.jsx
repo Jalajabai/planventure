@@ -68,15 +68,23 @@ const EditTripForm = ({ trip }) => {
     }));
   };
 
-  const isDateRangeValid = () => {
-    return formData.endDate.isAfter(formData.startDate) || 
-           formData.endDate.isSame(formData.startDate);
+  // Pickers yield null (cleared) or an invalid dayjs (partial input), so check before comparing
+  const hasValidDates = () => {
+    return Boolean(formData.startDate?.isValid() && formData.endDate?.isValid());
   };
+
+  const getDateError = () => {
+    if (!hasValidDates()) return 'Please enter valid start and end dates';
+    if (formData.endDate.isBefore(formData.startDate, 'day')) return 'End date must be after start date';
+    return '';
+  };
+
+  const dateError = getDateError();
 
   const isFormValid = () => {
     return formData.title?.trim() && 
            formData.destination?.trim() && 
-           isDateRangeValid() &&
+           !dateError &&
            !loading;
   };
 
@@ -137,12 +145,12 @@ const EditTripForm = ({ trip }) => {
             onChange={(newValue) => {
               setFormData(prev => ({ ...prev, endDate: newValue }));
             }}
-            minDate={formData.startDate}
+            minDate={formData.startDate?.isValid() ? formData.startDate : undefined}
             slotProps={{
               textField: { 
                 fullWidth: true,
-                error: !isDateRangeValid(),
-                helperText: !isDateRangeValid() ? 'End date must be after start date' : ''
+                error: Boolean(dateError),
+                helperText: dateError
               }
             }}
           />
