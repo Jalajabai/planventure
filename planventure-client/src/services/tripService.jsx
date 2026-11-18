@@ -3,7 +3,6 @@ import { api } from './api';
 export const tripService = {
   getAllTrips: async () => {
     try {
-      console.log('Fetching trips with auth token:', localStorage.getItem('token')); // Debug log
       const response = await api.get('/api/trips');
       console.log('Trips response:', response); // Debug log
       return response;

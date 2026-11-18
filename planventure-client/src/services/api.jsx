@@ -1,7 +1,9 @@
+import { getValidToken, removeToken } from '../utils/token';
+
 const BASE_URL = 'http://localhost:5000';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = getValidToken();
   return {
     'Content-Type': 'application/json',
     'Authorization': token ? `Bearer ${token}` : '',
@@ -10,7 +12,7 @@ const getAuthHeaders = () => {
 
 const handleResponse = async (response) => {
   if (response.status === 401) {
-    localStorage.removeItem('token');
+    removeToken();
     window.location.href = '/login';
     throw new Error('Session expired. Please login again.');
   }
