@@ -1,13 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
+import { Box, Typography, Paper, Button } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import TripList from '../components/trips/TripList';
-import { useAuth } from '../context/AuthContext';
 import travelingSvg from '../assets/undraw_traveling_yhxq.svg';
 
 const Dashboard = () => {
-  const { user } = useAuth();
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const WelcomeMessage = () => (
     <Box
@@ -72,10 +70,10 @@ const navigate = useNavigate();
         }}
       />
       <Typography variant="h5" component="h2" gutterBottom>
-        Oops! Looks like our compass is spinning! 🧭
+        Sorry, our compass is spinning in circles! 🧭
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '600px', mb: 3 }}>
-        We're having trouble loading your adventures. Don't worry, even the best travelers sometimes lose their way! Try refreshing the page or come back later.
+        We&apos;re really sorry, but we couldn&apos;t fetch your adventures just now. Our map-reading hamsters are working on it, and even the best explorers take a wrong turn sometimes. Please give it another go!
       </Typography>
       <Button
         variant="contained"

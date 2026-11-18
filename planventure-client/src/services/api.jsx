@@ -10,6 +10,14 @@ const getAuthHeaders = () => {
   };
 };
 
+const send = async (endpoint, init) => {
+  try {
+    return await fetch(`${BASE_URL}${endpoint}`, init);
+  } catch {
+    throw new Error('Unable to reach the server. Please check the API is running and try again.');
+  }
+};
+
 const handleResponse = async (response, { redirectOnUnauthorized = true } = {}) => {
   // Login/register return 401 for bad credentials, which is not an expired session
   if (response.status === 401 && redirectOnUnauthorized) {
@@ -32,14 +40,14 @@ const handleResponse = async (response, { redirectOnUnauthorized = true } = {}) 
 
 export const api = {
   get: async (endpoint) => {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await send(endpoint, {
       headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
   
   post: async (endpoint, data, options) => {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await send(endpoint, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -48,7 +56,7 @@ export const api = {
   },
 
   put: async (endpoint, data) => {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await send(endpoint, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import {
   Box,
   Paper,
@@ -34,6 +35,12 @@ const TabPanel = ({ children, value, index }) => (
     {value === index && children}
   </div>
 );
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  value: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired,
+};
 
 const TripDetailsPage = () => {
   const { tripId } = useParams();
@@ -191,7 +198,7 @@ const TripDetailsPage = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
           <Box>
             <Typography variant="h4" gutterBottom>
-              {trip.title}
+              {trip.title || trip.destination}
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <Chip

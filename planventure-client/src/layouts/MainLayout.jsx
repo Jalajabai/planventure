@@ -2,6 +2,8 @@ import { Box, Container } from '@mui/material';
 import Navbar from '../components/navigation/Navbar';
 import Footer from '../components/navigation/Footer';
 
+import PropTypes from 'prop-types';
+
 const MainLayout = ({ children }) => {
   return (
     <Box sx={{ 
@@ -33,6 +35,10 @@ const MainLayout = ({ children }) => {
       <Footer />
     </Box>
   );
+};
+
+MainLayout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default MainLayout;

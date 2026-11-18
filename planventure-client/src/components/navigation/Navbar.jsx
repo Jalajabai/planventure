@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = ({ children }) => {
@@ -64,6 +65,10 @@ const Navbar = ({ children }) => {
       </Toolbar>
     </AppBar>
   );
+};
+
+Navbar.propTypes = {
+  children: PropTypes.node,
 };
 
 export default Navbar;

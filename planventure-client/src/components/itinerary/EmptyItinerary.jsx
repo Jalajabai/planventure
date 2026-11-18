@@ -7,6 +7,8 @@ import {
 } from '@mui/material';
 import { PostAdd as PostAddIcon, AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
 
+import PropTypes from 'prop-types';
+
 const EmptyItinerary = ({ onCreateEmpty, onUseTemplate }) => {
   return (
     <Paper 
@@ -41,6 +43,11 @@ const EmptyItinerary = ({ onCreateEmpty, onUseTemplate }) => {
       </Stack>
     </Paper>
   );
+};
+
+EmptyItinerary.propTypes = {
+  onCreateEmpty: PropTypes.func.isRequired,
+  onUseTemplate: PropTypes.func.isRequired,
 };
 
 export default EmptyItinerary;

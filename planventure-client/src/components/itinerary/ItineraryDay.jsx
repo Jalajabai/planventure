@@ -15,6 +15,7 @@ import {
 } from '@mui/icons-material';
 import TimeSlot from './TimeSlot';
 import dayjs from 'dayjs';
+import PropTypes from 'prop-types';
 
 const ItineraryDay = ({ date, slots = [], onAddSlot, onUpdateSlot, onDeleteSlot }) => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -84,6 +85,17 @@ const ItineraryDay = ({ date, slots = [], onAddSlot, onUpdateSlot, onDeleteSlot 
       </Collapse>
     </Paper>
   );
+};
+
+ItineraryDay.propTypes = {
+  date: PropTypes.string.isRequired,
+  slots: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    time: PropTypes.string.isRequired,
+  })),
+  onAddSlot: PropTypes.func.isRequired,
+  onUpdateSlot: PropTypes.func.isRequired,
+  onDeleteSlot: PropTypes.func.isRequired,
 };
 
 export default ItineraryDay;

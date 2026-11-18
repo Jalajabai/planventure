@@ -6,6 +6,8 @@ import {
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
+import PropTypes from 'prop-types';
+
 const EmptyOverviewSection = ({ title, description, onAdd }) => {
   return (
     <Paper 
@@ -31,6 +33,12 @@ const EmptyOverviewSection = ({ title, description, onAdd }) => {
       </Button>
     </Paper>
   );
+};
+
+EmptyOverviewSection.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  onAdd: PropTypes.func.isRequired,
 };
 
 export default EmptyOverviewSection;

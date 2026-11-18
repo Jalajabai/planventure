@@ -12,6 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { tripService } from '../../services/tripService';
 
 const EditTripForm = ({ trip }) => {
@@ -168,6 +169,16 @@ const EditTripForm = ({ trip }) => {
       </Box>
     </Paper>
   );
+};
+
+EditTripForm.propTypes = {
+  trip: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    title: PropTypes.string,
+    destination: PropTypes.string,
+    start_date: PropTypes.string,
+    end_date: PropTypes.string,
+  }),
 };
 
 export default EditTripForm;

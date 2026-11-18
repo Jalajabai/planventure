@@ -18,6 +18,8 @@ import {
   Place as PlaceIcon
 } from '@mui/icons-material';
 
+import PropTypes from 'prop-types';
+
 const TimeSlot = ({ slot, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedSlot, setEditedSlot] = useState(slot);
@@ -116,6 +118,18 @@ const TimeSlot = ({ slot, onUpdate, onDelete }) => {
       </CardContent>
     </Card>
   );
+};
+
+TimeSlot.propTypes = {
+  slot: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    time: PropTypes.string.isRequired,
+    activity: PropTypes.string,
+    location: PropTypes.string,
+    type: PropTypes.string,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default TimeSlot;

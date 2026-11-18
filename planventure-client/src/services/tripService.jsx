@@ -18,10 +18,9 @@ export const tripService = {
 
   createTrip: async (tripData) => {
     try {
-      const response = await api.post('/api/trips', tripData);
-      return response.data;
+      return await api.post('/api/trips', tripData);
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to create trip');
+      throw new Error(error.message || 'Failed to create trip');
     }
   },
 

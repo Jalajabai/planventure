@@ -1,4 +1,5 @@
 import { Link as RouterLink } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Box, Container } from '@mui/material';
 import planventureLogo from '../assets/planventure-logo.svg';
 import Navbar from '../components/navigation/Navbar';
@@ -59,6 +60,10 @@ const AuthLayout = ({ children }) => {
       <Footer />
     </Box>
   );
+};
+
+AuthLayout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthLayout;

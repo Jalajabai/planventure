@@ -17,6 +17,7 @@ import {
   Hotel as HotelIcon
 } from '@mui/icons-material';
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -115,6 +116,19 @@ const AccommodationCard = ({ accommodation, onUpdate, onDelete }) => {
       </CardContent>
     </Card>
   );
+};
+
+AccommodationCard.propTypes = {
+  accommodation: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    name: PropTypes.string,
+    address: PropTypes.string,
+    checkIn: PropTypes.string,
+    checkOut: PropTypes.string,
+    bookingRef: PropTypes.string,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default AccommodationCard;

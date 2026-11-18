@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { 
   Grid, 
   Typography, 
-  Box, 
-  Alert,
   Button 
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import TripCard from './TripCard';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { tripService } from '../../services/tripService';
 
 const TripList = ({ WelcomeMessage, ErrorState }) => {
@@ -22,7 +21,6 @@ const TripList = ({ WelcomeMessage, ErrorState }) => {
       try {
         setLoading(true);
         const data = await tripService.getAllTrips();
-        console.log('TripList received data:', data); // Debug log
         
         if (!data || !data.trips) {
           console.error('Invalid data format:', data);
@@ -93,6 +91,11 @@ const TripList = ({ WelcomeMessage, ErrorState }) => {
       </Grid>
     </Grid>
   );
+};
+
+TripList.propTypes = {
+  WelcomeMessage: PropTypes.elementType.isRequired,
+  ErrorState: PropTypes.elementType.isRequired,
 };
 
 export default TripList;

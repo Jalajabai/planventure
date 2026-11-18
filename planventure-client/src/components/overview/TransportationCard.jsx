@@ -16,6 +16,7 @@ import {
   Cancel as CancelIcon
 } from '@mui/icons-material';
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const TransportationCard = ({ transport, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -126,6 +127,20 @@ const TransportationCard = ({ transport, onUpdate, onDelete }) => {
       </CardContent>
     </Card>
   );
+};
+
+TransportationCard.propTypes = {
+  transport: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    type: PropTypes.string.isRequired,
+    from: PropTypes.string,
+    to: PropTypes.string,
+    departure: PropTypes.string,
+    arrival: PropTypes.string,
+    bookingRef: PropTypes.string,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default TransportationCard;

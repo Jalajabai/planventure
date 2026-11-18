@@ -35,11 +35,10 @@ const NewTripForm = () => {
         title: formData.title,
         destination: formData.destination,
         start_date: formData.startDate.format('YYYY-MM-DD'),
-        end_date: formData.endDate.format('YYYY-MM-DD'),
-        status: 'Upcoming'
+        end_date: formData.endDate.format('YYYY-MM-DD')
       };
 
-      const response = await tripService.createTrip(tripData);
+      await tripService.createTrip(tripData);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to create trip');
@@ -56,15 +55,23 @@ const NewTripForm = () => {
     }));
   };
 
-  const isDateRangeValid = () => {
-    return formData.endDate.isAfter(formData.startDate) || 
-           formData.endDate.isSame(formData.startDate);
+  // Pickers yield null (cleared) or an invalid dayjs (partial input), so check before comparing
+  const hasValidDates = () => {
+    return Boolean(formData.startDate?.isValid() && formData.endDate?.isValid());
   };
 
+  const getDateError = () => {
+    if (!hasValidDates()) return 'Please enter valid start and end dates';
+    if (formData.endDate.isBefore(formData.startDate, 'day')) return 'End date must be after start date';
+    return '';
+  };
+
+  const dateError = getDateError();
+
   const isFormValid = () => {
-    return formData.title && 
-           formData.destination && 
-           isDateRangeValid() &&
+    return formData.title.trim() && 
+           formData.destination.trim() && 
+           !dateError &&
            !loading;
   };
 
@@ -126,12 +133,12 @@ const NewTripForm = () => {
             onChange={(newValue) => {
               setFormData(prev => ({ ...prev, endDate: newValue }));
             }}
-            minDate={formData.startDate}
+            minDate={formData.startDate?.isValid() ? formData.startDate : dayjs()}
             slotProps={{
               textField: { 
                 fullWidth: true,
-                error: !isDateRangeValid(),
-                helperText: !isDateRangeValid() ? 'End date must be after start date' : ''
+                error: Boolean(dateError),
+                helperText: dateError
               }
             }}
           />

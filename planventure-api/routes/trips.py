@@ -73,6 +73,7 @@ def create_trip():
         
         trip = Trip(
             user_id=user_id,
+            title=(data.get('title') or '').strip() or None,
             destination=data['destination'],
             start_date=start_date,
             end_date=end_date,
@@ -102,6 +103,7 @@ def get_trips():
     return jsonify({
         'trips': [{
             'id': trip.id,
+            'title': trip.title,
             'destination': trip.destination,
             'start_date': trip.start_date.isoformat(),
             'end_date': trip.end_date.isoformat(),
@@ -142,6 +144,7 @@ def get_trip(trip_id):
         
     return jsonify({
         'id': trip.id,
+        'title': trip.title,
         'destination': trip.destination,
         'start_date': trip.start_date.isoformat(),
         'end_date': trip.end_date.isoformat(),
@@ -160,6 +163,8 @@ def update_trip(trip_id):
     data = request.get_json()
     
     try:
+        if 'title' in data:
+            trip.title = (data['title'] or '').strip() or None
         if 'destination' in data:
             trip.destination = data['destination']
         if 'start_date' in data or 'end_date' in data:

@@ -1,11 +1,9 @@
 import { 
   Card, 
   CardContent, 
-  CardMedia, 
   Typography, 
   CardActions, 
   Button,
-  Chip,
   Box,
   Skeleton
 } from '@mui/material';
@@ -15,6 +13,7 @@ import {
   ArrowForward 
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const TripCard = ({ trip, loading }) => {
   const navigate = useNavigate();
@@ -39,7 +38,7 @@ const TripCard = ({ trip, loading }) => {
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h5" component="h2">
-          {trip.title}
+          {trip.title || trip.destination}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <LocationOn fontSize="small" color="primary" />
@@ -65,6 +64,17 @@ const TripCard = ({ trip, loading }) => {
       </CardActions>
     </Card>
   );
+};
+
+TripCard.propTypes = {
+  trip: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    title: PropTypes.string,
+    destination: PropTypes.string,
+    start_date: PropTypes.string,
+    end_date: PropTypes.string,
+  }),
+  loading: PropTypes.bool,
 };
 
 export default TripCard;
