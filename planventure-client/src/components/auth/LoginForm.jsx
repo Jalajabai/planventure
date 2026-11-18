@@ -16,7 +16,7 @@ import { api } from '../../services/api';
 const LoginForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, setIsAuthenticated } = useAuth();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,7 @@ const LoginForm = () => {
   });
 
   // Add state for success message
-  const [successMessage, setSuccessMessage] = useState(
+  const [successMessage] = useState(
     location.state?.message || ''
   );
 
@@ -71,6 +71,15 @@ const LoginForm = () => {
     }));
   };
 
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const validate = name === 'email' ? validateEmail : validatePassword;
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: validate(value)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -91,12 +100,10 @@ const LoginForm = () => {
 
     try {
       const response = await api.auth.login(formData);
-      console.log('Login response:', response);
 
       if (response.token) {
-        login(response); // Pass the entire response
-        console.log('Login successful, redirecting to dashboard...');
-        navigate('/dashboard', { replace: true });
+        login(response);
+        navigate(location.state?.from?.pathname || '/dashboard', { replace: true });
       } else {
         setError('Invalid login response');
       }
@@ -146,6 +153,7 @@ const LoginForm = () => {
         type="email"
         value={formData.email}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={!!formErrors.email}
         helperText={formErrors.email}
         disabled={isLoading}
@@ -159,6 +167,7 @@ const LoginForm = () => {
         type={showPassword ? 'text' : 'password'}
         value={formData.password}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={!!formErrors.password}
         helperText={formErrors.password}
         disabled={isLoading}
@@ -190,8 +199,8 @@ const LoginForm = () => {
       </Button>
 
       <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
-        Don't have an account?{' '}
-        <Button onClick={() => navigate('/signup')} stx={{ testTransform: 'none' }}>
+        Don&apos;t have an account?{' '}
+        <Button onClick={() => navigate('/signup')} sx={{ textTransform: 'none' }}>
           Sign up
         </Button>
       </Typography>

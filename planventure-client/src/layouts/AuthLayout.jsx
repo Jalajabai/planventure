@@ -1,4 +1,6 @@
+import { Link as RouterLink } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
+import planventureLogo from '../assets/planventure-logo.svg';
 import Navbar from '../components/navigation/Navbar';
 import Footer from '../components/navigation/Footer';
 
@@ -28,6 +30,17 @@ const AuthLayout = ({ children }) => {
           mb: 10
         }}
       >
+        <Box
+          component={RouterLink}
+          to="/"
+          sx={{ mb: 3, display: 'flex' }}
+        >
+          <img
+            src={planventureLogo}
+            alt="Planventure Logo"
+            style={{ height: '80px' }}
+          />
+        </Box>
         <Box
           sx={{
             display: 'flex',

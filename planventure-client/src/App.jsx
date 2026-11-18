@@ -9,29 +9,29 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <MainLayout>
-          <Routes>
-            {publicRoutes.map((route) => (
-              <Route 
-                key={route.path}
-                path={route.path}
-                element={route.element}
-              />
-            ))}
-            
-            {protectedRoutes.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  <ProtectedRoute>
+        <Routes>
+          {publicRoutes.map((route) => (
+            <Route 
+              key={route.path}
+              path={route.path}
+              element={route.element}
+            />
+          ))}
+          
+          {protectedRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
                     {route.element}
-                  </ProtectedRoute>
-                }
-              />
-            ))}
-          </Routes>
-        </MainLayout>
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+          ))}
+        </Routes>
       </Router>
     </AuthProvider>
   );
